@@ -102,6 +102,7 @@ echo "[Peer]" >> Nordvpn.conf
 echo "PublicKey = $publicKey" >> Nordvpn.conf
 echo "AllowedIPs = 0.0.0.0/0" >> Nordvpn.conf
 echo "Endpoint = $endpoint:51820" >> Nordvpn.conf
+echo "PersistentKeepalive = 25" >> Nordvpn.conf
 
 # Renaming config file to show the endpoint country id and server number
 outputFileName=`echo $endpoint |  grep -o '^[^.]*'`

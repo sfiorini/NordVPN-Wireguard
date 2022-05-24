@@ -49,6 +49,7 @@ The script is quite simple and can be run without parameters to generate a confi
 ```bash
 $ ./NordVpnToWireguard.sh
 ```
+But any options supplied to the script will be supplied directly to nordvpn connect, and will allow you to select the type of server, etc.
 
 Requesting a specific country:
 
@@ -72,7 +73,15 @@ Getting help:
 
 ```bash
 $ nordvpn connect --help
-Usage: NordVpnToWireguard [OPTIONS]
+nordvpn connect
+Usage: nordvpn connect [command options] [country]/[server]/[country_code]/[city]/[group] or [country] [city]
+
+Use this command to connect to NordVPN. Adding no arguments to the command will connect you to the recommended server.
+Provide a [country] argument to connect to a specific country. For example: 'nordvpn connect Australia'
+Provide a [server] argument to connecto to a specific server. For example: 'nordvpn connect jp35'
+Provide a [country_code] argument to connect to a specific country. For example: 'nordvpn connect us'
+Provide a [city] argument to connect to a specific city. For example: 'nordvpn connect Hungary Budapest'
+Provide a [group] argument to connect to a specific servers group. For example: 'nordvpn connect Onion_Over_VPN'
 ```
 
 ## Use the generated [Wireguard](https://www.wireguard.com) configuration files

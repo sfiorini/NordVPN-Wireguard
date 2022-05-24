@@ -1,6 +1,8 @@
 #!/bin/bash
+WG_CONF=wg0.conf
+DEFAULT_OPTIONS='-g legacy_obfuscated '
 
-nordvpn connect $@ || {
+nordvpn connect  $DEFAULT_OPTIONS $@ || {
     echo "Unable to connect to NordVPN."
     exit 1
 }
@@ -10,9 +12,9 @@ PRIVATE=$(sudo wg show nordlynx private-key)
 PUBKEY=$(sudo wg show nordlynx | grep peer | awk '{print $2}')
 ENDPOINT=$(nordvpn status | grep 'Current server' | awk '{print $3}')
 
-nordvpn disconnect &
+nordvpn disconnect > /dev/null 2>&1 &
 
-cat <<EOF > wg0.conf
+cat <<EOF > "${WG_CONF}"
 [Interface]
 Address = ${MYIP}
 PrivateKey = ${PRIVATE}

@@ -87,3 +87,4 @@ Provide a [group] argument to connect to a specific servers group. For example: 
 ## Use the generated [Wireguard](https://www.wireguard.com) configuration files
 
 Import the file/s with the  [Wireguard](https://www.wireguard.com) client in any platform and activate the `VPN`.
+Or run `sudo wg-quick up ./wg0.conf`

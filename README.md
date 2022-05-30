@@ -26,6 +26,16 @@ sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
 
 ## Login to your [NordVPN](https://nordvpn.com) account
 
+If `MFA` is ENABLED on your account:
+
+```bash
+nordvpn login
+```
+
+This will return a URL link.  
+Open the link on any browser, on any machine and perform the login.  
+Cancel out of the `Open with` popup, and copy the link that is assigned to the `Continue` link, under the message saying `You've successfully logged in`.
+
 Use `legacy` username and password to login.
 
 > Note: This will NOT work if you have `Multi Factor Authentication` enabled. If you have `MFA` enabled, please disable it, proceed with the login, then re-enable it.

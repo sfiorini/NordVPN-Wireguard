@@ -70,46 +70,43 @@ The script is quite simple and can be run without parameters to generate a confi
 
 ```bash
 $ ./NordVpnToWireguard.sh
-Getting configuration for recommended server...
-Wireguard configuration file NordVPN-us1234.conf created successfully!
 ```
+But any options supplied to the script will be supplied directly to nordvpn connect, and will allow you to select the type of server, etc.
 
 Requesting a specific country:
 
 ```bash
-$ ./NordVpnToWireguard.sh --country Canada
-Getting configuration for recommended server in Canada
-Wireguard configuration file NordVPN-ca1234.conf created successfully!
-```
-
-Requesting a specific city
-
-```bash
-$ ./NordVpnToWireguard.sh --city Berlin
-Getting configuration for recommended server in Berlin
-Wireguard configuration file NordVPN-de1234.conf created successfully!
+$ ./NordVpnToWireguard.sh Canada
 ```
 
 Requesting a specific country and city
 
 ```bash
-$ ./NordVpnToWireguard.sh --country Japan --city Tokyo
-Getting configuration for recommended server in Japan, city: Tokyo
-Wireguard configuration file NordVPN-jp1234.conf created successfully!
+$ ./NordVpnToWireguard.sh Hungary Budapest
+```
+
+Requesting a specific server type
+
+```bash
+$ ./NordVpnToWireguard.sh Onion_Over_VPN
 ```
 
 Getting help:
 
 ```bash
-$ ./NordVpnToWireguard.sh --help
-Usage: NordVpnToWireguard [OPTIONS]
-OPTION includes:
-   -v | --version  - prints out version information.
-   -c | --country  - Country to connect to (ex. Canada). If option is not provided, NordVPN will get a wireguard configuration for the recommended country, unless a valid city name is provided.
-   -s | --city - City to connect to (ex. Toronto). When country option is provided, NordVPN will look for the the city within the country and return the fastest server. If no country is provided, NordVPN will look up the fastest server for a city matching the name.
-   -h | --help     - displays this message.
+$ nordvpn connect --help
+nordvpn connect
+Usage: nordvpn connect [command options] [country]/[server]/[country_code]/[city]/[group] or [country] [city]
+
+Use this command to connect to NordVPN. Adding no arguments to the command will connect you to the recommended server.
+Provide a [country] argument to connect to a specific country. For example: 'nordvpn connect Australia'
+Provide a [server] argument to connecto to a specific server. For example: 'nordvpn connect jp35'
+Provide a [country_code] argument to connect to a specific country. For example: 'nordvpn connect us'
+Provide a [city] argument to connect to a specific city. For example: 'nordvpn connect Hungary Budapest'
+Provide a [group] argument to connect to a specific servers group. For example: 'nordvpn connect Onion_Over_VPN'
 ```
 
 ## Use the generated [Wireguard](https://www.wireguard.com) configuration files
 
 Import the file/s with the  [Wireguard](https://www.wireguard.com) client in any platform and activate the `VPN`.
+Or run `sudo wg-quick up ./wg0.conf`

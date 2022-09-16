@@ -3,7 +3,7 @@
 COUNTRY=""
 CITY=""
 GROUP=""
-VERSION="0.1.2"
+VERSION="0.1.1"
 
 while [ "$1" != "" ];
 do
@@ -110,10 +110,16 @@ mkdir -p "$TMP_DIR"
 trap 'rm -Rf "$TMP_DIR"' EXIT
 
 # Check if port 22 is already whitelisted
-nordvpn whitelist remove port 22 | grep -q "Port 22 (UDP|TCP) is not whitelisted." || WHITELISTED="yes" && WHITELISTED=""
+nordvpn settings | grep -q "       22 (" && WHITELISTED="yes" || WHITELISTED=""
 
 # Allow port 22 so it does not block ssh scripts
 nordvpn whitelist add port 22 >/dev/null
+
+# Check if technology is set as NordLynx
+nordvpn settings | grep -q 'Technology: NORDLYNX' && TECH_NORDLYNX="yes" || TECH_NORDLYNX=""
+
+# Set technology to NordLynx incase it's not already set as such
+nordvpn set technology NordLynx >/dev/null
 
 # Connect to NordVPN
 if [[ -z "$GROUP" ]]
@@ -154,6 +160,12 @@ if [[ -z "$WHITELISTED" ]]
 then
 	# Remove port 22 from whitelist if not already whitelisted when we started
 	nordvpn whitelist remove port 22 >/dev/null
+fi
+
+if [[ -z "$TECH_NORDLYNX" ]]
+then
+	# Set technology back to OpenVPN after running script
+	nordvpn set technology OpenVPN >/dev/null
 fi
 
 # Preparing the Peer section

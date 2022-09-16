@@ -47,6 +47,7 @@ do
 	 echo "   -c | --country  - Country to connect to (ex. Canada). If option is not provided, NordVPN will get a wireguard configuration for the recommended country, unless a valid city name is provided."
 	 echo "   -s | --city - City to connect to (ex. Toronto). When country option is provided, NordVPN will look for the the city within the country and return the fastest server. If no country is provided, NordVPN will look up the fastest server for a city matching the name."
          echo "   -g | --group  - Group to connect to (ex. P2P)"
+         echo "   -o | --output  - Config file to output to (ex. wg0.conf). If option is not provided, will output config name based on server chosen."
          echo "   -h | --help     - displays this message."
          exit
       ;;
@@ -104,7 +105,9 @@ else
         fi
 fi
 
-TMP_DIR=`mktemp -d -p "$(basename "$0")"`
+TMP_DIR=`mktemp -d -u -t "$(basename "$0").XXXXXXXXXX"`
+mkdir -p "$TMP_DIR"
+trap 'rm -Rf "$TMP_DIR"' EXIT
 
 # Connect to NordVPN
 if [[ -z "$GROUP" ]]

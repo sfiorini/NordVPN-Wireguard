@@ -25,21 +25,30 @@ do
              CITY="$1"
         fi
         ;;
+    -g | --group )
+        shift
+        if [ -n "$1" ]
+           then
+             GROUP="$1"
+        fi
+        ;;
     -h | --help )
          echo "Usage: NordVpnToWireguard [OPTIONS]"
          echo "OPTION includes:"
          echo "   -v | --version  - prints out version information."
 	 echo "   -c | --country  - Country to connect to (ex. Canada). If option is not provided, NordVPN will get a wireguard configuration for the recommended country, unless a valid city name is provided."
 	 echo "   -s | --city - City to connect to (ex. Toronto). When country option is provided, NordVPN will look for the the city within the country and return the fastest server. If no country is provided, NordVPN will look up the fastest server for a city matching the name."
+         echo "   -g | --group  - Group to connect to (ex. P2P)"
          echo "   -h | --help     - displays this message."
          exit
       ;;
     * )
          echo "Invalid option: $1"
-	      echo "Usage: NordVpnToWireguard [-v] [-c country] [-s server]"
+         echo "Usage: NordVpnToWireguard [-v] [-c country] [-s server]"
          echo "   -v | --version   - prints out version information."
          echo "   -c | --country   - country name"
          echo "   -s | --city      - city name"
+         echo "   -g | --group     - group name"
          echo "   -h | --help      - displays this message."
         exit
       ;;
@@ -49,26 +58,56 @@ done
 
 if [[ -z "$COUNTRY" ]] && [[ -z "$CITY" ]]
 then
-	echo "Getting configuration for recommended server..."
+	if [[ -z "$GROUP" ]]
+	then
+		echo "Getting configuration for recommended server..."
+	else
+                echo "Getting configuration for recommended server with group $GROUP ..."
+	fi
 else
 	if [[ -z "$CITY" ]] && [[ ! -z "$COUNTRY" ]]
 	then
-      		echo "Getting configuration for recommended server in $COUNTRY"
+                if [[ -z "$GROUP" ]]
+                then
+        		echo "Getting configuration for recommended server in $COUNTRY"
+                else
+                        echo "Getting configuration for recommended server in $COUNTRY with group $GROUP"
+                fi
 	fi
 
 	if [[ ! -z "$CITY" ]] && [[ -z "$COUNTRY" ]]
 	then
-      		echo "Getting configuration for recommended server in $CITY"
+                if [[ -z "$GROUP" ]]
+                then
+	      		echo "Getting configuration for recommended server in $CITY"
+		else
+                        echo "Getting configuration for recommended server in $CITY with group $GROUP"
+		fi
 	fi
 
 	if [[ ! -z "$CITY" ]] && [[ ! -z "$COUNTRY" ]]
         then
-                echo "Getting configuration for recommended server in $COUNTRY, city: $CITY"
+                if [[ -z "$GROUP" ]]
+                then
+                	echo "Getting configuration for recommended server in $COUNTRY, city: $CITY"
+		else
+                	echo "Getting configuration for recommended server in $COUNTRY, city: $CITY with group $GROUP"
+		fi
         fi
 fi
 
 # Connect to NordVPN
-nordvpn c $COUNTRY $CITY > /dev/null 2>&1
+if [[ -z "$GROUP" ]]
+then
+	nordvpn c $COUNTRY $CITY > /dev/null 2>&1
+else
+	if [[ -z "$COUNTRY" ]] && [[ -z "$CITY" ]]
+	then
+		nordvpn c $GROUP
+	else
+	        nordvpn c --group $GROUP $COUNTRY $CITY > /dev/null 2>&1
+	fi
+fi
 
 if [ $? -ne 0 ]
 then
@@ -92,7 +131,7 @@ curl -s "https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_te
 # Disconnect from NordVPN
 nordvpn d > /dev/null 2>&1
 
-# Preparing the Peer section 
+# Preparing the Peer section
 endpoint=`grep -m 1 -o '.*' Peer.txt | tail -n 1`
 publicKey=`grep -m 5 -o '.*' Peer.txt | tail -n 1`
 

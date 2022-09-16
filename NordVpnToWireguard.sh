@@ -3,7 +3,7 @@
 COUNTRY=""
 CITY=""
 GROUP=""
-VERSION="0.1.1"
+VERSION="0.1.2"
 
 while [ "$1" != "" ];
 do
@@ -109,6 +109,12 @@ TMP_DIR=`mktemp -d -u -t "$(basename "$0").XXXXXXXXXX"`
 mkdir -p "$TMP_DIR"
 trap 'rm -Rf "$TMP_DIR"' EXIT
 
+# Check if port 22 is already whitelisted
+nordvpn whitelist remove port 22 | grep -q "Port 22 (UDP|TCP) is not whitelisted." || WHITELISTED="yes" && WHITELISTED=""
+
+# Allow port 22 so it does not block ssh scripts
+nordvpn whitelist add port 22 >/dev/null
+
 # Connect to NordVPN
 if [[ -z "$GROUP" ]]
 then
@@ -143,6 +149,12 @@ curl -s "https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_te
 
 # Disconnect from NordVPN
 nordvpn d > /dev/null 2>&1
+
+if [[ -z "$WHITELISTED" ]]
+then
+	# Remove port 22 from whitelist if not already whitelisted when we started
+	nordvpn whitelist remove port 22 >/dev/null
+fi
 
 # Preparing the Peer section
 endpoint=`grep -m 1 -o '.*' "$TMP_DIR/Peer.txt" | tail -n 1`

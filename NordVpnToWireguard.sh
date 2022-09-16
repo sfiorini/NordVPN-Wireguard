@@ -2,7 +2,8 @@
 
 COUNTRY=""
 CITY=""
-VERSION="0.1.0"
+GROUP=""
+VERSION="0.1.1"
 
 while [ "$1" != "" ];
 do
@@ -30,6 +31,13 @@ do
         if [ -n "$1" ]
            then
              GROUP="$1"
+        fi
+        ;;
+    -o | --output )
+        shift
+        if [ -n "$1" ]
+           then
+             OUTPUT_FILE="$1"
         fi
         ;;
     -h | --help )
@@ -96,6 +104,8 @@ else
         fi
 fi
 
+TMP_DIR=`mktemp -d -p "$(basename "$0")"`
+
 # Connect to NordVPN
 if [[ -z "$GROUP" ]]
 then
@@ -116,38 +126,43 @@ then
 fi
 
 # Preparing the Interface section
-echo "[Interface]" > Nordvpn.conf
+echo "[Interface]" > "$TMP_DIR/Nordvpn.conf"
 privateKey=`sudo wg show nordlynx private-key`
-echo "PrivateKey = $privateKey" >> Nordvpn.conf
-echo "ListenPort = 51820" >> Nordvpn.conf
+echo "PrivateKey = $privateKey" >> "$TMP_DIR/Nordvpn.conf"
+echo "ListenPort = 51820" >> "$TMP_DIR/Nordvpn.conf"
 localAddress=`ifconfig nordlynx | grep inet |  awk -v OFS='\n' '{ print $2 }'`
-echo "Address = $localAddress/32" >> Nordvpn.conf
-echo "DNS = 103.86.96.100, 103.86.99.100" >> Nordvpn.conf
-echo "" >> Nordvpn.conf
+echo "Address = $localAddress/32" >> "$TMP_DIR/Nordvpn.conf"
+echo "DNS = 103.86.96.100, 103.86.99.100" >> "$TMP_DIR/Nordvpn.conf"
+echo "" >> "$TMP_DIR/Nordvpn.conf"
 
 # Gathering info for the Peer section
-curl -s "https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_technologies\]\[identifier\]=wireguard_udp&limit=1"|jq -r '.[]|.hostname, .station, (.locations|.[]|.country|.city.name), (.locations|.[]|.country|.name), (.technologies|.[].metadata|.[].value), .load' >> Peer.txt
+curl -s "https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_technologies\]\[identifier\]=wireguard_udp&limit=1"|jq -r '.[]|.hostname, .station, (.locations|.[]|.country|.city.name), (.locations|.[]|.country|.name), (.technologies|.[].metadata|.[].value), .load' >> "$TMP_DIR/Peer.txt"
 
 # Disconnect from NordVPN
 nordvpn d > /dev/null 2>&1
 
 # Preparing the Peer section
-endpoint=`grep -m 1 -o '.*' Peer.txt | tail -n 1`
-publicKey=`grep -m 5 -o '.*' Peer.txt | tail -n 1`
+endpoint=`grep -m 1 -o '.*' "$TMP_DIR/Peer.txt" | tail -n 1`
+publicKey=`grep -m 5 -o '.*' "$TMP_DIR/Peer.txt" | tail -n 1`
 
-rm Peer.txt
+rm -f "$TMP_DIR/Peer.txt"
 
-echo "[Peer]" >> Nordvpn.conf
-echo "PublicKey = $publicKey" >> Nordvpn.conf
-echo "AllowedIPs = 0.0.0.0/0" >> Nordvpn.conf
-echo "Endpoint = $endpoint:51820" >> Nordvpn.conf
-echo "PersistentKeepalive = 25" >> Nordvpn.conf
+echo "[Peer]" >> "$TMP_DIR/Nordvpn.conf"
+echo "PublicKey = $publicKey" >> "$TMP_DIR/Nordvpn.conf"
+echo "AllowedIPs = 0.0.0.0/0" >> "$TMP_DIR/Nordvpn.conf"
+echo "Endpoint = $endpoint:51820" >> "$TMP_DIR/Nordvpn.conf"
+echo "PersistentKeepalive = 25" >> "$TMP_DIR/Nordvpn.conf"
 
 # Renaming config file to show the endpoint country id and server number
-outputFileName=`echo $endpoint |  grep -o '^[^.]*'`
-outputFileName=`echo "NordVPN-$outputFileName.conf"`
+if [[ -z "$OUTPUT_FILE" ]]
+then
+	outputFileName=`echo "$endpoint" |  grep -o '^[^.]*'`
+	outputFileName=`echo "NordVPN-$outputFileName.conf"`
+else
+	outputFileName="$OUTPUT_FILE"
+fi
 
-mv Nordvpn.conf $outputFileName
+mv "$TMP_DIR/Nordvpn.conf" "$outputFileName"
 
 echo "Wireguard configuration file $outputFileName created successfully!"
 exit 0

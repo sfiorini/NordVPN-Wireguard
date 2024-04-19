@@ -76,12 +76,19 @@ then
 	exit 1
 fi
 
+if [ $(command -v ip &> /dev/null) ]; then
+        IP_ADDR_COMMAND="ip addr show"
+else
+        IP_ADDR_COMMAND="ifconfig"
+fi
+
+
 # Preparing the Interface section
 echo "[Interface]" > Nordvpn.conf
 privateKey=`sudo wg show nordlynx private-key`
 echo "PrivateKey = $privateKey" >> Nordvpn.conf
 echo "ListenPort = 51820" >> Nordvpn.conf
-localAddress=`ifconfig nordlynx | grep inet |  awk -v OFS='\n' '{ print $2 }'`
+localAddress=`$IP_ADDR_COMMAND nordlynx | grep inet |  awk -v OFS='\n' '{ print $2 }'`
 echo "Address = $localAddress/32" >> Nordvpn.conf
 echo "DNS = 103.86.96.100, 103.86.99.100" >> Nordvpn.conf
 echo "" >> Nordvpn.conf

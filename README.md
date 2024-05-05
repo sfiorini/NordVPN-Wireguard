@@ -32,6 +32,7 @@ Clone this project to have the script on your target Ubuntu system.
 * curl
 * jq
 * net-tools
+* wireguard
 * nordvpn
 
 You may install the required packages by running the following command:
@@ -49,6 +50,7 @@ sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
 #### Windows
 
 * Powershell 7.x
+* WireGuard
 * NordVPN Client
 
 You may install the latest version by downloading the package from [PowerShell/powershell](https://github.com/PowerShell/powershell/releases) releases, or if you prefer `winget`:
@@ -57,6 +59,9 @@ You may install the latest version by downloading the package from [PowerShell/p
 winget install --id Microsoft.Powershell --source winget
 ```
 You can get more information about the above command from Microsoft's documentation [here](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows).
+
+For Wireguard, simply go to the [official page](https://www.wireguard.com/install/) and download and install the package for Windows.
+If you prefer to install it by a different method, simply ensure that `wg.exe` is in your `PATH`. The usual installation path is `C:\Program Files\WireGuard\wg.exe`.
 
 For the NordVPN client, simply follow the [official download page instructions](https://nordvpn.com/download/windows/).
 

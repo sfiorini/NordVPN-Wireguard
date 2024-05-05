@@ -15,7 +15,7 @@ function Show-Help {
     Write-Host "OPTION includes:"
     Write-Host "   -Version           - prints out version information."
     Write-Host "   -Country <country> - Country to connect to (ex. Canada). If option is not provided, NordVPN will get a wireguard configuration for the recommended country, unless a valid city name is provided."
-    Write-Host "   -ID <id>           - ID to connect to (ex. 1234)."
+    Write-Host "   -Id <id>           - ID to connect to (ex. 1234)."
     Write-Host "   -Help              - displays this message."
     exit
 }
@@ -35,8 +35,11 @@ if ($Country) {
     # Write-Host "DEBUG: Found country $Country"
 }
 if ($Id) {
-    $Country = $Country -replace '_', ' '
     # Write-Host "DEBUG: Found ID $Id"
+    if (-not $Country) {
+        Write-Host "While specifying -Id, you also need to specify -Country. Exiting..."
+        exit 1
+    }
 }
 
 # Check if the script is running as an administrator
@@ -46,8 +49,8 @@ if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     if ($Country) {
         $params += " -Country `"$Country`""
     }
-    if ($ID) {
-        $params += " -ID `"$ID`""
+    if ($Id) {
+        $params += " -Id `"$Id`""
     }
     if ($Version) {
         $params += " -Version"
@@ -98,17 +101,17 @@ elseif ($Country -and -not $Id) {
         exit 1
     }
 }
-elseif ($Id -and -not $Country) {
-    Write-Host "Getting configuration for recommended server by ID $Id"
-    nordvpn -c -i $Id > $null 2>&1
+elseif ($Id -and $Country) {
+    Write-Host "Getting configuration for recommended server in $Country with ID $Id"
+    nordvpn -c -n "$Country #$Id" > $null 2>&1
 
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Unable to connect to NordVPN."
         exit 1
     }
 }
-elseif ($Id -and $Country) {
-    Write-Host "Please specify either Country group or ID, not both."
+elseif (-not $Country -and $Id) {
+    Write-Host "Please provide the Country group for the provided ID."
 }
 
 # Pooling for nordlynx interface
